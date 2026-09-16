@@ -13,3 +13,8 @@ class Routes:
     MANAGE_EVENTS="/admin/events"
 
 class Timeouts:
+    SHORT=5_000
+    MEDIUM=15_000
+    LONG=30_000
+
+

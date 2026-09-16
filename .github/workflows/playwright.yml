@@ -1,0 +1,87 @@
+name: Playwright Python Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to run (chromium / firefox / webkit)'
+        required: false
+        default: 'chromium'
+  schedule:
+    # Nightly regression run at 02:00 UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    name: Run Playwright tests
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    env:
+      BASE_URL: https://ecommerce-playground.lambdatest.io
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: python -m playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run Playwright tests (${{ matrix.browser }})
+        run: |
+          pytest --browser=${{ matrix.browser }} \
+                 --html=reports/report-${{ matrix.browser }}.html \
+                 --self-contained-html \
+                 --junitxml=reports/junit-${{ matrix.browser }}.xml
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: reports/
+          retention-days: 14
+
+      - name: Publish test summary
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Playwright Results (${{ matrix.browser }})
+          path: reports/junit-${{ matrix.browser }}.xml
+          reporter: java-junit
+          fail-on-error: false
+
+  merge-reports:
+    name: Collect combined reports
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all report artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-reports
+
+      - name: List downloaded reports
+        run: ls -R all-reports

@@ -14,6 +14,9 @@ class RegistrationPage(BasePage):
         self.password = TestData.random_password()
         self.confirm_password = self.password
 
+    def navigate_to_registration_page(self) -> None:
+        self.page.goto("https://eventhub.rahulshettyacademy.com/register")
+
     def enter_email(self,email) -> None:
         self.email_text_field.fill(email)
 
@@ -25,6 +28,11 @@ class RegistrationPage(BasePage):
 
     def click_register_button(self) -> None:
         self.register_button.click()
+
+    def navigate_to_sign_in_page(self):
+        self.sign_in_link.click()
+
+    
 
 
 

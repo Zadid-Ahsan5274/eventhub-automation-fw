@@ -4,7 +4,7 @@ navigation, common header/footer elements, and generic wait helpers.
 All page objects should extend this class.
 """
 
-from playwright.sync_api import Page, expect, Locator
+from playwright.sync_api import Page, expect
 
 class BasePage:
     def __init__(self,page:Page):

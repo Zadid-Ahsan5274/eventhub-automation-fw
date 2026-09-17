@@ -23,10 +23,10 @@ class BasePage:
         return self.page.url
 
     def click_explore_all_courses(self):
-        self.page.click(self.explore_all_courses_button)
+        self.explore_all_courses_button.click()
 
     def click_explore_skill_assessment(self):
-        self.page.click(self.explore_skill_assessment_button)
+        self.explore_skill_assessment_button.click()
 
     def wait_for_page_load(self)->None:
         try:
